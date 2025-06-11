@@ -1,11 +1,11 @@
 # =============================================================================
 # ARCHIVO: database/oracle_executor.py
-# Descripción: Ejecutor mejorado para Oracle
+# Descripción: Ejecutor mejorado para Oracle con soporte multi-BD
 # =============================================================================
 
 import oracledb
 import traceback
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from config.settings import Config
 import logging
 
@@ -15,19 +15,50 @@ class OracleExecutor:
     def __init__(self):
         self.config = Config
     
-    async def ejecutar_sql(self, sql: str) -> List[Dict[str, Any]]:
-        logger.info(f"📥 Ejecutando SQL: {sql[:100]}...")
+    async def ejecutar_sql(self, sql: str, connection_info: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
+        """
+        Ejecutar SQL en Oracle usando información de conexión específica o por defecto
+        
+        Args:
+            sql: Consulta SQL a ejecutar
+            connection_info: Información de conexión específica (opcional)
+        """
+        
+        # Usar conexión específica o la por defecto
+        if connection_info:
+            user = connection_info.get('user')
+            password = connection_info.get('password')
+            dsn = connection_info.get('dsn')
+            role = connection_info.get('role', 'normal')
+            logger.info(f"📥 Ejecutando SQL en BD específica: {dsn}")
+        else:
+            # Conexión por defecto (para compatibilidad)
+            user = self.config.ORACLE_USER
+            password = self.config.ORACLE_PASSWORD
+            dsn = self.config.ORACLE_DSN
+            role = 'sysdba'
+            logger.info(f"📥 Ejecutando SQL en BD por defecto: {dsn}")
+            
+        logger.info(f"🔍 SQL: {sql[:100]}...")
         
         conn = None
         cursor = None
         
         try:
+            # Determinar modo de autenticación
+            if role.lower() == 'sysdba':
+                auth_mode = oracledb.AUTH_MODE_SYSDBA
+            elif role.lower() == 'sysoper':
+                auth_mode = oracledb.AUTH_MODE_SYSOPER
+            else:
+                auth_mode = oracledb.AUTH_MODE_DEFAULT
+            
             # Conexión a Oracle
             conn = oracledb.connect(
-                user=self.config.ORACLE_USER,
-                password=self.config.ORACLE_PASSWORD,
-                dsn=self.config.ORACLE_DSN,
-                mode=oracledb.AUTH_MODE_SYSDBA
+                user=user,
+                password=password,
+                dsn=dsn,
+                mode=auth_mode
             )
             cursor = conn.cursor()
             
@@ -50,7 +81,7 @@ class OracleExecutor:
                        for col, val in zip(columnas, fila)}
                 resultado.append(item)
             
-            logger.info(f"✅ Consulta ejecutada. {len(resultado)} filas obtenidas.")
+            logger.info(f"✅ Consulta ejecutada exitosamente. {len(resultado)} filas obtenidas.")
             return resultado
             
         except oracledb.DatabaseError as e:
@@ -68,4 +99,3 @@ class OracleExecutor:
                 cursor.close()
             if conn:
                 conn.close()
-
