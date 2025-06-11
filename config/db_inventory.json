@@ -1,0 +1,30 @@
+{
+  "databases": [
+    {
+      "id": "brm_db",
+      "connection": {
+        "host": "192.168.100.29",
+        "user": "sys",
+        "password": "Condor2024",
+        "service_name": "orcl",
+        "role": "sysdba"
+      },
+      "aliases": ["brm", "BRM", "consultas"],
+      "description": "Base de datos BRM para consultas",
+      "active": true
+    },
+    {
+      "id": "sap_db", 
+      "connection": {
+        "host": "192.168.100.45",
+        "user": "sys",
+        "password": "Condor2024",
+        "service_name": "orcl",
+        "role": "sysdba"
+      },
+      "aliases": ["sap", "SAP", "facturas"],
+      "description": "Base de datos SAP para facturas",
+      "active": true
+    }
+  ]
+}
