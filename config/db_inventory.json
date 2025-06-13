@@ -25,6 +25,19 @@
       "aliases": ["sap", "SAP", "facturas"],
       "description": "Base de datos SAP para facturas",
       "active": true
+    },
+    {
+      "id": "XE", 
+      "connection": {
+        "host": "localhost",
+        "user": "sys",
+        "password": "password123",
+        "service_name": "XE",
+        "role": "sysdba"
+      },
+      "aliases": ["xe", "XE", "BD de Pruebas dockerizada"],
+      "description": "Base de datos XE es para pruebas",
+      "active": true
     }
   ]
 }
