@@ -79,3 +79,4 @@ Proporciona un análisis breve, técnico y claro (máximo 3-4 líneas). Indica s
         
         return resumen
 
+
